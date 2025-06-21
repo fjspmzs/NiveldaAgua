@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useRef } from 'react';
 import * as d3 from 'd3';
 import api from './config/configApi'
+import  {Simulador}  from './simuladosESP32/Simulador'
+
 type Nivel = {
   createdAt: string;
   updatedAt: string;
@@ -8,24 +10,33 @@ type Nivel = {
 };
 
 const TamanhoGrafico = {
-  widthPerDay: 200,
-  height: 400,
+  widthPerDay: 350,
+  height: 700,
 };
 
 const TunelD3 = () => {
   const [nivel, setNivel] = useState<Nivel[]>([]);
   const svgRef = useRef<SVGSVGElement | null>(null);
 
-  useEffect(() => {
-    api('/nivel')
-      .then(res => {
-        const data = res.data;
-        const tresDiasAtras = new Date();
-        tresDiasAtras.setDate(tresDiasAtras.getDate() - 3);
-        const filtrado = data.filter((n: Nivel) => new Date(n.createdAt) >= tresDiasAtras);
-        setNivel(filtrado);
-      });
-  }, []);
+useEffect(() => {
+  const carregarDados = async () => {
+    try {
+      const res = await api('/nivel');
+      const data = res.data;
+      const tresDiasAtras = new Date();
+      tresDiasAtras.setDate(tresDiasAtras.getDate() - 3);
+      const filtrado = data.filter((n: Nivel) => new Date(n.createdAt) >= tresDiasAtras);
+      setNivel(filtrado);
+    } catch (err) {
+      console.error("Erro ao carregar níveis:", err);
+    }
+  };
+
+  carregarDados(); // primeira vez
+  const intervalo = setInterval(carregarDados, 30000); // atualiza a cada 30s
+
+  return () => clearInterval(intervalo); // limpa o intervalo ao desmontar
+}, []);
 
   useEffect(() => {
     if (nivel.length === 0) return;
@@ -83,7 +94,7 @@ const TunelD3 = () => {
         .append("circle")
         .attr("cx", xOffset + TamanhoGrafico.widthPerDay / 2)
         .attr("cy", d => yScale(d.nivel))
-        .attr("r", 6)
+        .attr("r", 20)
         .attr("fill", d => colorScale(d.nivel));
 
       const maxNivel = d3.max(dadosDia, d => d.nivel);
@@ -105,8 +116,9 @@ const TunelD3 = () => {
   }, [nivel]);
 
   return (
-    <div>
-      <h1>Túnel de Medições (Últimos 3 dias)</h1>
+    <div className='container-fluid-ms' style={{textAlign:'center'}}>
+      <h1 style={{textAlign:'center'}}>Túnel de Medições (Últimos 3 dias)</h1>
+      <Simulador/>
       <svg ref={svgRef}></svg>
     </div>
   );

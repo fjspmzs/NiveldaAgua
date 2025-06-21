@@ -23,9 +23,8 @@ services:
     environment:
       - DB_NAME=pmzspy
       - DB_USER=root
-      - DB_PASS=rootpmzs
+      - DB_PASSWORD=rootpmzs   # ✅ Corrigido aqui
       - DB_HOST=mysql
-  
 
   frontend:
     build:
@@ -46,4 +45,4 @@ services:
       - backend
 
 volumes:
-  mysql-data:                   
+  mysql-data:

@@ -1,7 +1,8 @@
-
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const { Sequelize, DataTypes } = require('sequelize');
+
 
 const app = express();
 app.use(cors());
@@ -10,9 +11,9 @@ app.use(express.json());
 const sequelize = new Sequelize(
   process.env.DB_NAME || 'pmzspy',
   process.env.DB_USER || 'root',
-  process.env.DB_PASS || 'rootpmzs',
+  process.env.DB_PASSWORD || 'rootpmzs',
   {
-    host: process.env.DB_HOST || 'mysql',
+    host: process.env.DB_HOST || 'localhost',
     dialect: 'mysql'
   }
   
